@@ -1,0 +1,27 @@
+import { join } from 'node:path';
+import { env } from 'read-env-value';
+import FSClient from 'fs-cnpm';
+import { SyncMode } from '../app/common/constants.js';
+import type { EggAppConfig } from 'egg';
+
+export default function prodConfig(appInfo: EggAppConfig) {
+  const cnpmcore = {
+    syncMode: SyncMode.admin,
+    allowScopes: ['@cnpm', '@cnpmcore', '@example'],
+    allowPublicRegistration: false,
+    // 这里可以添加多个帐号 [username: email]
+    admins: {
+      cnpmcore_admin: 'admin@cnpmjs.org',
+    },
+  };
+
+  const dataDir = env('CNPMCORE_DATA_DIR', 'string', join(appInfo.root, '.cnpmcore'));
+
+  const nfsDir = env('CNPMCORE_NFS_DIR', 'string', join(dataDir, 'nfs'));
+
+  const nfs = {
+    client: new FSClient({ dir: nfsDir }),
+  };
+
+  return { cnpmcore, nfs };
+}

@@ -1,0 +1,5 @@
+cnpmcore
+cnpm
+INITDB
+npminstall
+npmupdate

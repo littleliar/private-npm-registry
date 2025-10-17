@@ -1,0 +1,40 @@
+name: cnpmcore-db
+
+volumes:
+  cnpm-redis:
+  cnpm-mysql:
+
+networks:
+  cnpm-network:
+    driver: bridge
+    name: cnpm-network
+
+services:
+  redis:
+    image: redis:8.2-m01-alpine3.22
+    restart: always
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+    volumes:
+      - ${REDIS_STORAGE:-cnpm-redis}:/data
+    ports:
+      - ${EXPOSE_REDIS_PORT:-6379}:6379
+    networks:
+      - cnpm-network
+
+  mysql:
+    image: mysql:9.3.0
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-}
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-cnpmcore}
+      TZ: ${TZ:-Asia/Shanghai}
+    volumes:
+      - ${MYSQL_STORAGE:-cnpm-mysql}:/var/lib/mysql
+      - ${MYSQL_INITDB_SCRIPT:-../sql/mysql}:/docker-entrypoint-initdb.d
+    ports:
+      - ${EXPOSE_MYSQL_PORT:-3306}:3306
+    networks:
+      - cnpm-network
